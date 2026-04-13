@@ -1,0 +1,185 @@
+{% extends 'workshop_app/base.html' %}
+
+{% block title %} Statistics {% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+
+        <!-- FILTER -->
+        <div class="col-md-3">
+            <form method="GET">
+                <div class="card shadow-sm">
+
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Filters</h5>
+                        <a href="{% url 'statistics_app:public' %}" class="btn btn-sm btn-outline-secondary">
+                            Clear
+                        </a>
+                    </div>
+
+                    <div class="card-body">
+
+                        <div class="form-group mb-3">
+                            <label>From Date</label>
+                            {{ form.from_date }}
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label>To Date</label>
+                            {{ form.to_date }}
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label>Workshop</label>
+                            {{ form.workshop_type }}
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label>State</label>
+                            {{ form.state }}
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label>{{ form.sort.help_text }}</label>
+                            {{ form.sort }}
+                        </div>
+
+                        {% if request.user.is_authenticated %}
+                        <div class="form-check mb-3">
+                            {{ form.show_workshops }}
+                            <label class="form-check-label">
+                                {{ form.show_workshops.help_text }}
+                            </label>
+                        </div>
+                        {% endif %}
+
+                        <button type="submit" class="btn btn-primary w-100 mb-2">
+                            View
+                        </button>
+
+                        <button type="submit" class="btn btn-secondary w-100"
+                                name="download" value="download">
+                            Download
+                        </button>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- TABLE -->
+        <div class="col-md-9">
+
+            <!-- TOP BAR -->
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+
+                <!-- ✅ ONLY ONE PAGINATOR -->
+                <div>
+                    {% include "statistics_app/paginator.html" %}
+                </div>
+
+                <div>
+                    <button class="btn btn-outline-primary me-2" id="state_graph">
+                        State Chart
+                    </button>
+                    <button class="btn btn-outline-success" id="type_graph">
+                        Workshop Chart
+                    </button>
+                </div>
+
+            </div>
+
+            <!-- TABLE CARD -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>#</th>
+                                    <th>Coordinator</th>
+                                    <th>Institute</th>
+                                    <th>Instructor</th>
+                                    <th>Workshop</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                {% for workshop in objects %}
+                                <tr>
+                                    <td>{{ forloop.counter0|add:objects.start_index }}</td>
+                                    <td>{{ workshop.coordinator.get_full_name|capfirst }}</td>
+                                    <td>{{ workshop.coordinator.profile.institute|capfirst }}</td>
+                                    <td>{{ workshop.instructor.get_full_name|capfirst }}</td>
+                                    <td>{{ workshop.workshop_type.name }}</td>
+                                    <td>{{ workshop.date|date }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center">
+                                        No data found
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<!-- MODAL -->
+<div id="dialog" title="Workshops Statistics">
+    <canvas id="myChart"></canvas>
+</div>
+
+<script>
+var state_labels = {{ws_states|safe}};
+var state_data = {{ws_count|safe}};
+var type_labels = {{ws_type|safe}};
+var type_data = {{ws_type_count|safe}};
+var chart;
+
+$("#state_graph").on("click", function() {
+    show_graph(state_labels, state_data, "State wise workshops");
+});
+
+$("#type_graph").on("click", function() {
+    show_graph(type_labels, type_data, "Type wise workshops");
+});
+
+function show_graph(labels, data, graph_name) {
+    var ctx = document.getElementById('myChart').getContext('2d');
+    if(chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                label: graph_name,
+                backgroundColor: '#2563eb',
+                borderColor: '#2563eb',
+            }]
+        }
+    });
+
+    $("#dialog").dialog({
+        width: 900,
+        height: 500
+    });
+}
+</script>
+
+{% endblock %}

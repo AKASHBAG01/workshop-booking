@@ -1,0 +1,177 @@
+{% extends 'workshop_app/base.html' %}
+{% load custom_filters %}
+
+{% block title %} Workshop Types {% endblock %}
+
+{% block content %}
+
+<style>
+
+/* Title */
+.page-title {
+    text-align: center;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+/* Card */
+.table-card {
+    background: white;
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+/* Table */
+.table-modern {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+/* Header */
+.table-modern thead {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: white;
+}
+
+.table-modern th {
+    padding: 12px;
+    font-size: 14px;
+}
+
+/* Body */
+.table-modern td {
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+/* Hover */
+.table-modern tbody tr:hover {
+    background: #f1f5f9;
+}
+
+/* Badge */
+.badge-duration {
+    background: #6366f1;
+    color: white;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+}
+
+/* Button */
+.btn-view {
+    border-radius: 8px;
+    font-size: 13px;
+    padding: 5px 10px;
+}
+
+/* Add button */
+.btn-add {
+    float: right;
+    margin-bottom: 15px;
+}
+
+/* Pagination */
+.pagination .page-link {
+    border-radius: 8px;
+    margin: 0 3px;
+}
+
+</style>
+
+<div class="container mt-4">
+
+    <h3 class="page-title">Workshop Types</h3>
+
+    <!-- ADD BUTTON -->
+    {% if request.user|has_group:"instructor" %}
+        <a href="{% url 'workshop_app:add_workshop_type' %}" class="btn btn-primary btn-add">
+            + Add Workshop Type
+        </a>
+    {% endif %}
+
+    <div class="table-card">
+
+        <table class="table-modern">
+
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Workshop Name</th>
+                    <th>Duration</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                {% for w in workshop_type %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+
+                    <td>
+                        <strong>{{ w.name }}</strong>
+                    </td>
+
+                    <td>
+                        <span class="badge-duration">
+                            {{ w.duration }} days
+                        </span>
+                    </td>
+
+                    <td>
+                        <a href="{% url 'workshop_app:workshop_type_details' w.id %}"
+                           class="btn btn-outline-primary btn-view">
+                            View
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="4" class="text-center text-muted">
+                        No workshop types available
+                    </td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    <!-- 🔥 PAGINATION -->
+    <div class="mt-4 text-center">
+        <nav>
+            <ul class="pagination justify-content-center">
+
+                {% if workshop_type.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ workshop_type.previous_page_number }}">
+                            Previous
+                        </a>
+                    </li>
+                {% endif %}
+
+                <li class="page-item active">
+                    <span class="page-link">
+                        {{ workshop_type.number }}
+                    </span>
+                </li>
+
+                {% if workshop_type.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="?page={{ workshop_type.next_page_number }}">
+                            Next
+                        </a>
+                    </li>
+                {% endif %}
+
+            </ul>
+        </nav>
+    </div>
+
+</div>
+
+{% endblock %}

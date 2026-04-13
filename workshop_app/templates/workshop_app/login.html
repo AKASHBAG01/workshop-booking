@@ -1,0 +1,72 @@
+{% extends 'workshop_app/base.html' %}
+
+{% block title %}
+    Login
+{% endblock %}
+
+{% block content %}
+
+<div style="display:flex; justify-content:center; align-items:center; min-height:80vh;">
+
+    <div class="card" style="width:380px; padding:10px;">
+
+        <div class="card-body">
+
+            <!-- Heading -->
+            <h3 class="page-heading" style="text-align:center; margin-bottom:5px;">
+                Welcome Back
+            </h3>
+            <p class="page-subheading" style="text-align:center;">
+                Login to your account
+            </p>
+
+            <form method="post">
+                {% csrf_token %}
+
+                <!-- Errors -->
+                {% if form.errors %}
+                    <div class="alert alert-danger">
+                        Invalid username or password
+                    </div>
+                {% endif %}
+
+                <!-- Username -->
+                <div class="form-group">
+                    <label>Username</label>
+                    {{ form.username }}
+                </div>
+
+                <!-- Password -->
+                <div class="form-group">
+                    <label>Password</label>
+                    {{ form.password }}
+                </div>
+
+                <!-- Button -->
+                <button type="submit" class="btn btn-primary btn-block" style="margin-top:10px;">
+                    Sign In
+                </button>
+
+            </form>
+
+            <!-- Divider -->
+            <hr class="fw-divider">
+
+            <!-- Links -->
+            <div style="text-align:center; font-size:13px;">
+                <a href="{% url 'workshop_app:register' %}">
+                    Create new account
+                </a>
+                <br><br>
+                <a href="{% url 'password_reset' %}">
+                    Forgot password?
+                </a>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+{% endblock %}

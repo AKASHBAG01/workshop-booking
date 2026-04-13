@@ -1,0 +1,226 @@
+{% extends 'workshop_app/base.html' %}
+
+{% block title %} Profile {% endblock %}
+
+{% block content %}
+
+<style>
+
+/* 🔥 HEADER STRIP (PREMIUM) */
+.profile-strip {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: white;
+    padding: 25px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+/* Title badge */
+.profile-title {
+    display: inline-block;
+    background: rgba(255,255,255,0.15);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+/* Timeline */
+.timeline {
+    position: relative;
+    margin-top: 25px;
+    padding-left: 25px;
+    border-left: 2px solid #e2e8f0;
+}
+
+.timeline-item {
+    margin-bottom: 20px;
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: slideUp 0.6s ease forwards;
+}
+
+.timeline-item:nth-child(1) { animation-delay: 0.1s; }
+.timeline-item:nth-child(2) { animation-delay: 0.2s; }
+.timeline-item:nth-child(3) { animation-delay: 0.3s; }
+.timeline-item:nth-child(4) { animation-delay: 0.4s; }
+
+/* Dot */
+.timeline-item::before {
+    content: "";
+    position: absolute;
+    left: -10px;
+    top: 6px;
+    width: 12px;
+    height: 12px;
+    background: #6366f1;
+    border-radius: 50%;
+}
+
+/* Animation */
+@keyframes slideUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Info cards */
+.info-card {
+    background: white;
+    padding: 14px 16px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+}
+
+/* Workshops */
+.workshop-box {
+    border-left: 4px solid #6366f1;
+    padding: 12px 16px;
+    border-radius: 10px;
+    background: #f8fafc;
+    transition: all 0.3s ease;
+}
+
+.workshop-box:hover {
+    background: #eef2ff;
+    transform: translateX(5px);
+}
+
+</style>
+
+<div class="container mt-4">
+
+    <!-- 🔥 HEADER -->
+    <div class="profile-strip mb-4">
+
+        <!-- ✅ TITLE (Mr./Ms./Dr.) -->
+        <div class="profile-title">
+            {% if coordinator_profile.user.profile.title %}
+                {{ coordinator_profile.user.profile.title }}
+            {% else %}
+                Mr.
+            {% endif %}
+        </div>
+
+        <!-- NAME -->
+        <h3 class="mb-1">
+            {{ coordinator_profile.user.first_name }} {{ coordinator_profile.user.last_name }}
+        </h3>
+
+        <!-- EMAIL -->
+        <p class="mb-1 text-light">{{ coordinator_profile.user.email }}</p>
+
+        <!-- INSTITUTE -->
+        <small class="text-light opacity-75">
+            {{ coordinator_profile.user.profile.institute }}
+        </small>
+
+    </div>
+
+    {% if Workshops %}
+
+    <!-- 🔥 TIMELINE -->
+    <div class="timeline">
+
+        <div class="timeline-item">
+            <div class="info-card">
+                <strong>Phone</strong><br>
+                {{ coordinator_profile.user.profile.phone_number }}
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="info-card">
+                <strong>Department</strong><br>
+                {{ coordinator_profile.user.profile.department }}
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="info-card">
+                <strong>Location</strong><br>
+                {{ coordinator_profile.user.profile.location }}
+            </div>
+        </div>
+
+        <div class="timeline-item">
+            <div class="info-card">
+                <strong>Position</strong><br>
+                {{ coordinator_profile.user.profile.position }}
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 🔥 WORKSHOPS -->
+    <div class="card mt-4 border-0 shadow-sm">
+        <div class="card-header bg-dark text-white text-center">
+            Workshops
+        </div>
+
+        <div class="card-body">
+
+            {% for workshop in Workshops %}
+            <div class="workshop-box mb-3">
+
+                <strong>{{ workshop.workshop_type }}</strong><br>
+
+                <small>Date: {{ workshop.date }}</small><br>
+
+                {% if workshop.instructor %}
+                    <small>Instructor: {{ workshop.instructor }}</small>
+                {% else %}
+                    <span class="badge bg-warning mt-1">Pending</span>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+
+        </div>
+    </div>
+
+    {% else %}
+
+    <!-- 🔥 FORM -->
+    <div class="card shadow-sm border-0">
+        <div class="card-header text-center bg-dark text-white">
+            Update Profile
+        </div>
+
+        <div class="card-body">
+
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.errors %}
+                <div class="alert alert-danger">
+                    {{ form.errors }}
+                </div>
+                {% endif %}
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">{{ form.first_name }}</div>
+                    <div class="col-md-6 mb-3">{{ form.last_name }}</div>
+                    <div class="col-md-6 mb-3">{{ form.phone_number }}</div>
+                    <div class="col-md-6 mb-3">{{ form.institute }}</div>
+                    <div class="col-md-6 mb-3">{{ form.department }}</div>
+                    <div class="col-md-6 mb-3">{{ form.position }}</div>
+                    <div class="col-md-6 mb-3">{{ form.location }}</div>
+                    <div class="col-md-6 mb-3">{{ form.state }}</div>
+                </div>
+
+                <button class="btn btn-success mt-2">Update</button>
+                <a href="{% url 'workshop_app:index' %}" class="btn btn-secondary mt-2">Cancel</a>
+
+            </form>
+
+        </div>
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}
